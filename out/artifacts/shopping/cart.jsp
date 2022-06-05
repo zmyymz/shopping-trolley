@@ -116,12 +116,14 @@
 					//Product p = dao.findById(id);
 				
 					HashMap map = (HashMap)session.getAttribute("cart");
-					Iterator it = map.keySet().iterator();
-					while(it.hasNext()){
-						Object key = it.next();
-						CartItem cartItem = (CartItem)map.get(key);
-						Product p = cartItem.getP();
-						int sum = cartItem.getSum();
+					if (map != null && !map.isEmpty()) {
+						Iterator it = map.keySet().iterator();
+						while(it.hasNext()){
+							Object key = it.next();
+							CartItem cartItem = (CartItem)map.get(key);
+							Product p = cartItem.getP();
+							if (p == null) continue;
+							int sum = cartItem.getSum();
 
 					%>
 						<div class="bundle  bundle-last ">
@@ -206,31 +208,72 @@
 						</div>
 							<%
 						}
+					} else {
 						%>
+						<div align="center" style="margin:50px">
+							<font color="red" size=5>购物车中暂时没有商品</font>
+						</div>
+						<%
+					}
+					%>
 					
 					</tr>
 					
 					
 				</div>
 				<script>
-					function fun1(id , price){
-						var sum = parseInt(document.getElementById("sum" + id).value)+1;
-						var m = sum * parseFloat(price);
-						document.getElementById("m"+id).innerHTML = m;
-						document.getElementById("J_Total").innerHTML = m;
-						var sum1 = parseInt(document.getElementsByClassName("text_box")[0].value) + 1;
-						document.getElementById("J_SelectedItemsCount").innerHTML = sum1 ;
-						
+					function fun1(id, price) {
+						var sumInput = document.getElementById("sum" + id);
+						var sum = parseInt(sumInput.value) + 1;
+						var stock = 1000; // 应该从后端获取
+						if (sum > stock) {
+							alert("库存不足！");
+							return;
+						}
+						sumInput.value = sum;
+						var m = (sum * parseFloat(price)).toFixed(2);
+						document.getElementById("m" + id).innerHTML = m;
+						calculateTotal();
 					}
-					function fun2(id , price){
-						var sum = parseInt(document.getElementById("sum" + id).value)-1;
-						var m = sum * parseFloat(price);
-						document.getElementById("m"+id).innerHTML = m;
-						document.getElementById("J_Total").innerHTML = m;
-						
-						document.getElementById("J_SelectedItemsCount").innerHTML = document.getElementsByClassName("text_box")[0].value;
-						
+					
+					function fun2(id, price) {
+						var sumInput = document.getElementById("sum" + id);
+						var sum = parseInt(sumInput.value) - 1;
+						if (sum < 1) {
+							if (confirm("是否要删除此商品？")) {
+								window.location.href = "doDeleteCart.jsp?id=" + id;
+							}
+							return;
+						}
+						sumInput.value = sum;
+						var m = (sum * parseFloat(price)).toFixed(2);
+						document.getElementById("m" + id).innerHTML = m;
+						calculateTotal();
 					}
+					
+					// 计算购物车总价
+					function calculateTotal() {
+						var total = 0;
+						var count = 0;
+						var priceElements = document.getElementsByClassName("J_ItemSum");
+						for (var i = 0; i < priceElements.length; i++) {
+							var price = parseFloat(priceElements[i].innerHTML);
+							if (!isNaN(price)) {
+								total += price;
+								var textInput = priceElements[i].parentNode.parentNode.parentNode.querySelector(".text_box");
+								if (textInput) {
+									count += parseInt(textInput.value);
+								}
+							}
+						}
+						document.getElementById("J_Total").innerHTML = total.toFixed(2);
+						document.getElementById("J_SelectedItemsCount").innerHTML = count;
+					}
+					
+					// 页面加载时计算初始总价
+					window.onload = function() {
+						calculateTotal();
+					};
 				</script>
 				<div class="clear"></div>
 	

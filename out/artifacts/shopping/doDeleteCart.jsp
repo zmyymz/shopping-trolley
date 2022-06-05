@@ -3,12 +3,15 @@
          pageEncoding="UTF-8" %>
 <%
     String id = request.getParameter("id");
+    if (id == null || id.trim().isEmpty()) {
+        response.sendRedirect("cart.jsp");
+        return;
+    }
+    
     HashMap map = (HashMap) session.getAttribute("cart");
-    //System.out.println(map.size() + "---之前---" + map.keySet());
-    map.remove(id);
-    //System.out.println(id+"a");类型不匹配导致无法删除
-    //System.out.println(map.size() + "---之后---" + map.keySet());
-
-    session.setAttribute("cart", map);
+    if (map != null) {
+        map.remove(id);
+        session.setAttribute("cart", map);
+    }
     response.sendRedirect("cart.jsp");
 %>

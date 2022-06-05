@@ -29,14 +29,15 @@
         <div class="topMessage">
             <div class="menu-hd">
                 <%
-                    if (request.getParameter("username") != null) {
+                    String username = (String) session.getAttribute("username");
+                    if (username != null) {
                 %>
-                <a href="#" target="_top" class="h">欢迎</a>
+                <a href="#" target="_top">欢迎，<%=username%></a>
                 <%
                 } else {
                 %>
-                <a href="#" target="_top" class="h">亲，请登录</a>
-                <a href="#" target="_top">免费注册</a>
+                <a href="login.jsp" target="_top" class="h">亲，请登录</a>
+                <a href="register.jsp" target="_top">免费注册</a>
                 <% }
                 %>
             </div>
@@ -199,7 +200,7 @@
                                         </strong>
                                     </p>
                                     <p class="number fl">
-                                        销量<span><%= p.getNum() %></span>
+                                        销量<span>1015</span>
                                     </p>
                                 </div>
                             </a>
@@ -227,7 +228,7 @@
                                 <strong>29.90</strong>
                             </p>
                             <p class="number fl">
-                                销量<span>1110</span>
+                                销量<span>1015</span>
                             </p>
                         </div>
                     </li>
@@ -240,7 +241,7 @@
                                 <strong>8.90</strong>
                             </p>
                             <p class="number fl">
-                                销量<span>1110</span>
+                                销量<span>1015</span>
                             </p>
                         </div>
                     </li>
@@ -253,7 +254,7 @@
                                 <strong>29.90</strong>
                             </p>
                             <p class="number fl">
-                                销量<span>1110</span>
+                                销量<span>1015</span>
                             </p>
                         </div>
                     </li>

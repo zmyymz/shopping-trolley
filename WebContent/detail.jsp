@@ -44,14 +44,15 @@
         <div class="topMessage">
             <div class="menu-hd">
                 <%
-                    if (idStr != null) {
+                    String username = (String) session.getAttribute("username");
+                    if (username != null) {
                 %>
-                <a href="#" target="_top" class="h">欢迎</a>
+                <a href="#" target="_top">欢迎，<%=username%></a>
                 <%
                 } else {
                 %>
-                <a href="#" target="_top" class="h">亲，请登录</a>
-                <a href="#" target="_top">免费注册</a>
+                <a href="login.jsp" target="_top" class="h">亲，请登录</a>
+                <a href="register.jsp" target="_top">免费注册</a>
                 <% }
                 %>
             </div>
@@ -302,7 +303,7 @@
                         <input id="min" class="am-btn am-btn-default" name="" type="button" value="-"/>
                         <input id="text_box" name="" type="text" value="1" style="width:30px;"/>
                         <input id="add" class="am-btn am-btn-default" name="" type="button" value="+"/>
-                        <span id="Stock" class="tb-hidden">库存<span class="stock">1000</span>件</span>
+                        <span id="Stock" class="tb-hidden">库存<span class="stock"><%= p.getNum() %></span>件</span>
                     </dd>
 
             </div>
@@ -319,7 +320,7 @@
             </div>
             <div class="text-info">
                 <span class="J_Price price-now">¥39.00</span>
-                <span id="Stock" class="tb-hidden">库存<span class="stock">1000</span>件</span>
+                <span id="Stock" class="tb-hidden">库存<span class="stock"><%= p.getNum() %></span>件</span>
             </div>
         </div>
 
@@ -365,7 +366,7 @@
     </li>
     <li>
         <div class="clearfix tb-btn tb-btn-basket theme-login">
-            <a id="LikBasket" title="加入购物车" href="doCart.jsp?id=<%= p.getId()%>"><i></i>加入购物车</a>
+            <a id="LikBasket" title="加入购物车" href="javascript:void(0);" onclick="addToCart(<%= p.getId() %>)"><i></i>加入购物车</a>
         </div>
     </li>
 </div>
@@ -1369,6 +1370,33 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    // 加入购物车函数，带上用户选择的数量
+    function addToCart(productId) {
+        var quantityInput = document.getElementById('text_box');
+        var quantity = parseInt(quantityInput.value);
+        
+        if (isNaN(quantity) || quantity < 1) {
+            alert('请输入有效的数量！');
+            return;
+        }
+        
+        // 获取库存信息
+        var stockElement = document.querySelector('.stock');
+        if (stockElement) {
+            var stock = parseInt(stockElement.innerText);
+            if (quantity > stock) {
+                alert('库存不足！当前库存：' + stock);
+                return;
+            }
+        }
+        
+        // 跳转到 doCart.jsp，带上 id 和 quantity 参数
+        window.location.href = 'doCart.jsp?id=' + productId + '&quantity=' + quantity;
+    }
+</script>
+
 <%
     }
 %>

@@ -23,6 +23,9 @@
 	rs = sql.executeQuery();
 	if (rs.next()) {
 		flag = true;
+		// Save user info to session
+		session.setAttribute("username", rs.getString("username"));
+		System.out.println("[do_login.jsp] User logged in: " + users);
 	}
 	rs.close();
 	sql.close();

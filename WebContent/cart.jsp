@@ -25,19 +25,18 @@
 			<ul class="message-l">
 				<div class="topMessage">
 					<div class="menu-hd">
-<%--						<%--%>
-<%--							if (request.getParameter("username") != null) {--%>
-<%--						%>--%>
-<%--						<a href="#" target="_top" class="h">欢迎</a>--%>
-<%--						<%--%>
-<%--						} else {--%>
-<%--						%>--%>
-<%--						<a href="#" target="_top" class="h">亲，请登录</a>--%>
-<%--						<a href="#" target="_top">免费注册</a>--%>
-<%--						<% }--%>
-<%--						%>--%>
-						<%--<a href="#" target="_top" class="h">亲，请登录</a>--%>
-						<%--<a href="#" target="_top">免费注册</a>--%>
+						<%
+							String username = (String) session.getAttribute("username");
+							if (username != null) {
+						%>
+						<a href="#" target="_top">欢迎，<%=username%></a>
+						<%
+						} else {
+						%>
+						<a href="login.jsp" target="_top" class="h">亲，请登录</a>
+						<a href="register.jsp" target="_top">免费注册</a>
+						<% }
+						%>
 					</div>
 				</div>
 			</ul>
@@ -116,12 +115,14 @@
 					//Product p = dao.findById(id);
 				
 					HashMap map = (HashMap)session.getAttribute("cart");
-					Iterator it = map.keySet().iterator();
-					while(it.hasNext()){
-						Object key = it.next();
-						CartItem cartItem = (CartItem)map.get(key);
-						Product p = cartItem.getP();
-						int sum = cartItem.getSum();
+					if (map != null && !map.isEmpty()) {
+						Iterator it = map.keySet().iterator();
+						while(it.hasNext()){
+							Object key = it.next();
+							CartItem cartItem = (CartItem)map.get(key);
+							Product p = cartItem.getP();
+							if (p == null) continue;
+							int sum = cartItem.getSum();
 
 					%>
 						<div class="bundle  bundle-last ">
@@ -139,8 +140,8 @@
 								<ul class="item-content clearfix">
 									<li class="td td-chk">
 										<div class="cart-checkbox ">
-											<input class="check" id="J_CheckBox_170769542747" name="items[]" value="170769542747" type="checkbox">
-											<label for="J_CheckBox_170769542747"></label>
+											<input class="check" id="J_CheckBox_<%= p.getId() %>" name="items[]" value="<%= p.getId() %>" type="checkbox" onchange="toggleSingleSelect()">
+											<label for="J_CheckBox_<%= p.getId() %>"></label>
 										</div>
 									</li>
 									<li class="td td-item">
@@ -167,7 +168,7 @@
 										<div class="item-price price-promo-promo">
 											<div class="price-content">
 												<div class="price-line">
-													<em class="price-original">78.00</em>
+													<em class="price-original">98.00</em>
 												</div>
 												<div class="price-line">
 													<em class="J_Price price-now" tabindex="0"><%= p.getPrice() %></em>
@@ -179,10 +180,10 @@
 										<div class="amount-wrapper ">
 											<div class="item-amount ">
 												<div class="sl">
-													<input class="min am-btn" name="" type="button" value="-" onclick="fun2(<%= p.getId() %>,<%= p.getPrice()%>)"/>
+													<input class="min am-btn" name="" type="button" value="-" onclick="decreaseQuantity(<%= p.getId() %>,<%= p.getPrice()%>)"/>
 													<!-- 购物车中此类物品的数量  -->
-													<input class="text_box" id="sum<%= p.getId() %>" name="" type="text" value="<%= sum %>" style="width:30px;" />
-													<input class="add am-btn" name="" type="button" value="+" onclick="fun1(<%= p.getId() %>,<%= p.getPrice()%>)"/>
+													<input class="text_box" id="sum<%= p.getId() %>" name="" type="text" value="<%= sum %>" data-stock="<%= p.getNum() %>" style="width:30px;" readonly />
+													<input class="add am-btn" name="" type="button" value="+" onclick="increaseQuantity(<%= p.getId() %>,<%= p.getPrice()%>)"/>
 												</div>
 											</div>
 										</div>
@@ -190,15 +191,13 @@
 									<li class="td td-sum">
 										<div class="td-inner">
 										<!-- 这里设置购物车商品的初试价格 -->
-											<em tabindex="0" class="J_ItemSum number" id="m<%=p.getId()%>"><%= p.getPrice() %> </em>
+											<em tabindex="0" class="J_ItemSum number" id="m<%=p.getId()%>"><%= sum * p.getPrice() %> </em>
 										</div>
 									</li>
 									<li class="td td-op">
 										<div class="td-inner">
-											<a title="移入收藏夹" class="btn-fav" href="#">
-                  移入收藏夹</a>
-											<a href="doDeleteCart.jsp?id=<%= p.getId() %>" data-point-url="#" class="delete">
-                  删除</a>
+											<a title="移入收藏夹" class="btn-fav" href="#">移入收藏夹</a>
+											<a href="javascript:void(0);" onclick="deleteItem(<%= p.getId() %>)" data-point-url="#" class="delete">删除</a>
 										</div>
 									</li>
 								</ul>
@@ -206,31 +205,216 @@
 						</div>
 							<%
 						}
+					} else {
 						%>
+						<div align="center" style="margin:50px">
+							<font color="red" size=5>购物车中暂时没有商品</font>
+						</div>
+						<%
+					}
+					%>
 					
 					</tr>
 					
 					
 				</div>
 				<script>
-					function fun1(id , price){
-						var sum = parseInt(document.getElementById("sum" + id).value)+1;
-						var m = sum * parseFloat(price);
-						document.getElementById("m"+id).innerHTML = m;
-						document.getElementById("J_Total").innerHTML = m;
-						var sum1 = parseInt(document.getElementsByClassName("text_box")[0].value) + 1;
-						document.getElementById("J_SelectedItemsCount").innerHTML = sum1 ;
-						
+					// 增加商品数量
+					function increaseQuantity(id, price) {
+						console.log("increaseQuantity 被调用，ID:", id);
+						var sumInput = document.getElementById("sum" + id);
+						// 防止重复点击
+						if (sumInput.dataset.updating === 'true') {
+							console.log("正在更新中，忽略点击");
+							return;
+						}
+						var oldSum = parseInt(sumInput.value);
+						var sum = oldSum + 1;
+						var stock = parseInt(sumInput.getAttribute('data-stock')); // 从后端获取真实库存
+						console.log("旧数量:", oldSum, "新数量:", sum, "库存:", stock);
+						if (sum > stock) {
+							alert("库存不足！当前库存：" + stock);
+							return;
+						}
+						// 设置更新标记，防止重复点击
+						sumInput.dataset.updating = 'true';
+						// 异步更新购物车数量到服务器，成功后再刷新页面
+						updateCartQuantity(id, sum, sumInput);
 					}
-					function fun2(id , price){
-						var sum = parseInt(document.getElementById("sum" + id).value)-1;
-						var m = sum * parseFloat(price);
-						document.getElementById("m"+id).innerHTML = m;
-						document.getElementById("J_Total").innerHTML = m;
-						
-						document.getElementById("J_SelectedItemsCount").innerHTML = document.getElementsByClassName("text_box")[0].value;
-						
+													
+					// 减少商品数量
+					function decreaseQuantity(id, price) {
+						console.log("decreaseQuantity 被调用，ID:", id);
+						var sumInput = document.getElementById("sum" + id);
+						// 防止重复点击
+						if (sumInput.dataset.updating === 'true') {
+							console.log("正在更新中，忽略点击");
+							return;
+						}
+						var oldSum = parseInt(sumInput.value);
+						var sum = oldSum - 1;
+						console.log("旧数量:", oldSum, "新数量:", sum);
+						if (sum < 1) {
+							if (confirm("是否要删除此商品？")) {
+								window.location.href = "doDeleteCart.jsp?id=" + id;
+							}
+							return;
+						}
+						// 设置更新标记，防止重复点击
+						sumInput.dataset.updating = 'true';
+						// 异步更新购物车数量到服务器，成功后再刷新页面
+						updateCartQuantity(id, sum, sumInput);
 					}
+										
+					// 异步更新购物车数量到服务器
+					function updateCartQuantity(id, quantity, sumInput) {
+						// 设置更新标记
+						sumInput.dataset.updating = 'true';
+						
+						var xhr = new XMLHttpRequest();
+						xhr.open("POST", "UpdateCartServlet", true);
+						xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+						xhr.send("id=" + id + "&quantity=" + quantity);
+						xhr.onreadystatechange = function() {
+							if (xhr.readyState === 4 && xhr.status === 200) {
+								var response = xhr.responseText.trim();
+								console.log("UpdateCartServlet 响应:", response);
+								// 移除更新标记
+								sumInput.dataset.updating = 'false';
+								if (response === "success") {
+									// 更新成功后刷新页面，让 JSP 重新从 Session 读取最新数据
+									console.log("更新成功，刷新页面...");
+									window.location.reload();
+								} else {
+									console.error("更新失败:", response);
+									// 如果更新失败，也刷新页面
+									window.location.reload();
+								}
+							}
+						};
+					}
+										
+					// 删除商品
+					function deleteItem(id) {
+						if (confirm("确定要删除此商品吗？")) {
+							window.location.href = "doDeleteCart.jsp?id=" + id;
+						}
+					}
+										
+					// 批量删除选中商品
+					function batchDelete() {
+						var checkboxes = document.querySelectorAll('.check');
+						var selectedIds = [];
+						checkboxes.forEach(function(cb) {
+							if (cb.checked) {
+								selectedIds.push(cb.value);
+							}
+						});
+											
+						if (selectedIds.length === 0) {
+							alert("请选择要删除的商品");
+							return;
+						}
+											
+						if (confirm("确定要删除选中的 " + selectedIds.length + " 件商品吗？")) {
+							var xhr = new XMLHttpRequest();
+							xhr.open("POST", "BatchDeleteServlet", true);
+							xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+							xhr.send("ids=" + selectedIds.join(","));
+							xhr.onreadystatechange = function() {
+								if (xhr.readyState === 4 && xhr.status === 200) {
+									window.location.reload();
+								}
+							};
+						}
+					}
+										
+					// 全选/取消全选
+					function toggleSelectAll() {
+						var selectAllCbx = document.getElementById("J_SelectAllCbx2");
+						var checkboxes = document.querySelectorAll('.check');
+						checkboxes.forEach(function(cb) {
+							cb.checked = selectAllCbx.checked;
+						});
+						calculateTotal();
+					}
+										
+					// 单选商品
+					function toggleSingleSelect() {
+						calculateTotal();
+					}
+										
+					// 计算购物车总价
+					function calculateTotal() {
+						var total = 0;
+						var count = 0;
+						var checkboxes = document.querySelectorAll('.check');
+						checkboxes.forEach(function(cb) {
+							if (cb.checked) {
+								var row = cb.closest('.item-content');
+								if (row) {
+									var priceElement = row.querySelector(".J_ItemSum");
+									var quantityInput = row.querySelector(".text_box");
+									if (priceElement && quantityInput) {
+										var price = parseFloat(priceElement.innerHTML);
+										var quantity = parseInt(quantityInput.value);
+										if (!isNaN(price) && !isNaN(quantity)) {
+											total += price;
+											count += quantity;
+										}
+									}
+								}
+							}
+						});
+											
+						var totalElement = document.getElementById("J_Total");
+						var countElement = document.getElementById("J_SelectedItemsCount");
+						var goBtn = document.getElementById("J_Go");
+											
+						if (totalElement) {
+							totalElement.innerHTML = total.toFixed(2);
+						}
+						if (countElement) {
+							countElement.innerHTML = count;
+						}
+											
+						// 控制结算按钮状态
+						if (goBtn) {
+							if (total > 0) {
+								goBtn.classList.remove("submit-btn-disabled");
+							} else {
+								goBtn.classList.add("submit-btn-disabled");
+							}
+						}
+					}
+										
+					// 页面加载时绑定事件
+					window.onload = function() {
+						console.log("页面加载完成，开始绑定事件");
+											
+						// 绑定全选事件
+						var selectAllCbx = document.getElementById("J_SelectAllCbx2");
+						if (selectAllCbx) {
+							selectAllCbx.addEventListener('change', toggleSelectAll);
+						}
+											
+						// 绑定单选事件
+						var checkboxes = document.querySelectorAll('.check');
+						checkboxes.forEach(function(cb) {
+							cb.addEventListener('change', toggleSingleSelect);
+						});
+											
+						// 绑定批量删除事件
+						var deleteAllBtn = document.querySelector('.deleteAll');
+						if (deleteAllBtn) {
+							deleteAllBtn.addEventListener('click', batchDelete);
+						}
+																		
+						// 计算初始总价
+						calculateTotal();
+											
+						console.log("事件绑定完成");
+					};
 				</script>
 				<div class="clear"></div>
 	
@@ -260,7 +444,7 @@
 							<strong class="price">¥<em id="J_Total">0.00</em></strong>
 						</div>
 						<div class="btn-area">
-							<a href="pay.html" id="J_Go" class="submit-btn submit-btn-disabled" aria-label="请注意如果没有选择宝贝，将无法结算">
+							<a href="pay.jsp" id="J_Go" class="submit-btn submit-btn-disabled" aria-label="请注意如果没有选择宝贝，将无法结算">
 								<span>结&nbsp;算</span></a>
 						</div>
 					</div>

@@ -34,8 +34,18 @@
         <ul class="message-l">
             <div class="topMessage">
                 <div class="menu-hd">
+                    <%
+                        String username = (String) session.getAttribute("username");
+                        if (username != null) {
+                    %>
+                    <a href="#" target="_top">欢迎，<%=username%></a>
+                    <%
+                    } else {
+                    %>
                     <a href="login.jsp" target="_top" class="h">亲，请登录</a>
                     <a href="register.jsp" target="_top">免费注册</a>
+                    <% }
+                    %>
                 </div>
             </div>
         </ul>
