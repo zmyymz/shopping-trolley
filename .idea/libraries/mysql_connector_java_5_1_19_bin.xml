@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="mysql-connector-java-5.1.19-bin">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/WebContent/WEB-INF/lib/mysql-connector-java-5.1.19-bin.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../utils/apache-tomcat-9.0.0.M22/lib/tomcat-jni.jar!/" />
+      <root url="file://$PROJECT_DIR$/../../utils/apache-tomcat-9.0.0.M22/lib" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="file://$PROJECT_DIR$/../../utils/apache-tomcat-9.0.0.M22/lib" recursive="false" />
+  </library>
+</component>

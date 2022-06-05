@@ -1,0 +1,16 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="shopping">
+    <output-path>$PROJECT_DIR$/out/artifacts/shopping</output-path>
+    <root id="root">
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="shopping-trolley" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="mysql-connector-java-5.1.19-bin" />
+        </element>
+      </element>
+      <element id="javaee-facet-resources" facet="shopping-trolley/web/Web" />
+    </root>
+  </artifact>
+</component>
