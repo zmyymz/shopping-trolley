@@ -58,30 +58,24 @@
     
     //3.2 Check if product exists in cart
     CartItem cartItem = map.get(id);
+    // 库存校验（覆盖模式：用本次数量直接覆盖山车中已有数量）
+    if (targetQuantity > p.getNum()) {
+        System.out.println("[doCart.jsp] ERROR: Insufficient stock");
+        out.println("<script>alert('\u5e93\u5b58\u4e0d\u8db3\uff01\u5f53\u524d\u5e93\u5b58\uff1a' + " + p.getNum() + ");history.back();</script>");
+        return;
+    }
+    if (p.getNum() <= 0) {
+        System.out.println("[doCart.jsp] ERROR: Product sold out");
+        out.println("<script>alert('\u5546\u54c1\u5df2\u552e\u7f84\uff01');history.back();</script>");
+        return;
+    }
     if (cartItem != null) {
-        // Product exists -> check stock and add target quantity
+        // 商品已在购物车 -> 直接覆盖数量
         int oldSum = cartItem.getSum();
-        int newSum = oldSum + targetQuantity;
-        System.out.println("[doCart.jsp] Product exists, old quantity: " + oldSum + ", adding: " + targetQuantity + ", new quantity: " + newSum);
-        if (newSum > p.getNum()) {
-            System.out.println("[doCart.jsp] ERROR: Insufficient stock");
-            out.println("<script>alert('库存不足！当前库存：' + " + p.getNum() + ");history.back();</script>");
-            return;
-        }
-        cartItem.setSum(newSum);
-        System.out.println("[doCart.jsp] SUCCESS: Quantity updated to: " + newSum);
+        cartItem.setSum(targetQuantity);
+        System.out.println("[doCart.jsp] Product exists, old quantity: " + oldSum + ", overwrite to: " + targetQuantity);
     } else {
-        // New product -> check stock and add to cart
-        if (targetQuantity > p.getNum()) {
-            System.out.println("[doCart.jsp] ERROR: Insufficient stock for new item");
-            out.println("<script>alert('库存不足！当前库存：' + " + p.getNum() + ");history.back();</script>");
-            return;
-        }
-        if (p.getNum() <= 0) {
-            System.out.println("[doCart.jsp] ERROR: Product sold out");
-            out.println("<script>alert('商品已售罄！');history.back();</script>");
-            return;
-        }
+        // 新商品 -> 加入购物车
         cartItem = new CartItem();
         cartItem.setP(p);
         cartItem.setSum(targetQuantity);

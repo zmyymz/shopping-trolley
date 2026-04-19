@@ -301,7 +301,7 @@
                                             <div class="cart-title number">数量</div>
                     <dd>
                         <input id="min" class="am-btn am-btn-default" name="" type="button" value="-"/>
-                        <input id="text_box" name="" type="text" value="1" style="width:30px;"/>
+                        <input id="text_box" name="" type="text" value="1" data-stock="<%= p.getNum() %>" style="width:30px;"/>
                         <input id="add" class="am-btn am-btn-default" name="" type="button" value="+"/>
                         <span id="Stock" class="tb-hidden">库存<span class="stock"><%= p.getNum() %></span>件</span>
                     </dd>
@@ -361,12 +361,12 @@
     </div>
     <li>
         <div class="clearfix tb-btn tb-btn-buy theme-login">
-            <a id="LikBuy" title="点此按钮到下一步确认购买信息" href="#">立即购买</a>
+            <a id="LikBuy" title="点此按钮到下一步确认购买信息" href="#" onclick="event.stopPropagation()">立即购买</a>
         </div>
     </li>
     <li>
         <div class="clearfix tb-btn tb-btn-basket theme-login">
-            <a id="LikBasket" title="加入购物车" href="javascript:void(0);" onclick="addToCart(<%= p.getId() %>)"><i></i>加入购物车</a>
+            <a id="LikBasket" title="加入购物车" href="javascript:void(0);" onclick="addToCart(<%= p.getId() %>); event.stopPropagation();"><i></i>加入购物车</a>
         </div>
     </li>
 </div>
@@ -1382,14 +1382,11 @@
             return;
         }
         
-        // 获取库存信息
-        var stockElement = document.querySelector('.stock');
-        if (stockElement) {
-            var stock = parseInt(stockElement.innerText);
-            if (quantity > stock) {
-                alert('库存不足！当前库存：' + stock);
-                return;
-            }
+        // 从 data-stock 属性读取库存，避免依赖可能被隐藏的 DOM 文本
+        var stock = parseInt(quantityInput.getAttribute('data-stock'));
+        if (!isNaN(stock) && quantity > stock) {
+            alert('库存不足！当前库存：' + stock);
+            return;
         }
         
         // 跳转到 doCart.jsp，带上 id 和 quantity 参数

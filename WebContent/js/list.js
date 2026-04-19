@@ -116,21 +116,30 @@ $(document).ready(function() {
 	var t = $("#text_box");
 	//初始化数量为1,并失效减
 	$('#min').attr('disabled', true);
-	//数量增加操作
-	$("#add").click(function() {
-			t.val(parseInt(t.val()) + 1)
-			if (parseInt(t.val()) != 1) {
-				$('#min').attr('disabled', false);
+	//数量增加操作（先off解绑再on绑定，防止重复绑定导致多加）
+	$("#add").off('click').on('click', function() {
+			var current = parseInt(t.val());
+			// 从 data-stock 属性读取库存，避免依赖可能被隐藏的 DOM 文本
+			var stock = parseInt(t.attr('data-stock'));
+			if (!isNaN(stock) && current >= stock) {
+				alert('库存不足！当前库存：' + stock);
+				return;
 			}
-
+			t.val(current + 1);
+			$('#min').attr('disabled', false);
 		})
-		//数量减少操作
-	$("#min").click(function() {
-		t.val(parseInt(t.val()) - 1);
-		if (parseInt(t.val()) == 1) {
+		//数量减少操作（先off解绑再on绑定，防止重复绑定导致多减）
+	$("#min").off('click').on('click', function() {
+		var current = parseInt(t.val());
+		// 先判断再操作，防止数量变为0或负数
+		if (current <= 1) {
+			$('#min').attr('disabled', true);
+			return;
+		}
+		t.val(current - 1);
+		if (parseInt(t.val()) <= 1) {
 			$('#min').attr('disabled', true);
 		}
-
 	})
 
 })
