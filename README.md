@@ -36,11 +36,21 @@ shopping-trolley/
 ## 环境要求
 
 - **JDK**: 1.8+
-- **MySQL**: 5.7+
+- **MySQL**: 5.7+（推荐使用 USBWebserver，便携免安装）
 - **Tomcat**: 9.0+
 - **IDE**: Eclipse 或 IntelliJ IDEA
 
 ## 数据库配置
+
+### 推荐工具：USBWebserver
+
+[USBWebserver](https://www.usbwebserver.net/) 是一个绿色便携的集成环境，内置 Apache + PHP + MySQL，无需安装，解压即用，非常适合本项目的本地开发调试。
+
+1. 下载并解压 USBWebserver
+2. 启动后点击 **phpMyAdmin** 进入数据库管理界面
+3. 新建数据库 `shop`，导入 `sql/ShopCart.sql`
+
+> 如果已有 MySQL，也可跳过此步骤直接使用命令行导入。
 
 ### 1. 初始化数据库
 
@@ -50,7 +60,7 @@ shopping-trolley/
 mysql -u root -p < sql/ShopCart.sql
 ```
 
-或使用 MySQL 客户端工具（Navicat、DBeaver 等）导入该 SQL 文件。
+或使用 MySQL 客户端工具（Navicat、DBeaver、phpMyAdmin 等）导入该 SQL 文件。
 
 ### 2. 修改数据库连接
 
@@ -278,7 +288,3 @@ taskkill /F /PID <进程ID>
 ## 许可证
 
 本项目仅供学习参考使用。
-
-## 作者
-
-yhb
